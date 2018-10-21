@@ -34,7 +34,7 @@
  (reel)
  (let [store (:store reel)
        states (:states store)
-       state (or (:data states) {:show-control? false, :show-list? false, :playing-idx 0})]
+       state (or (:data states) {:show-control? true, :show-list? false, :playing-idx 0})]
    (div
     {:style (merge
              ui/global
