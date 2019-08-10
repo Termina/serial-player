@@ -2,16 +2,16 @@
 (ns app.comp.container
   (:require [hsl.core :refer [hsl]]
             [respo-ui.core :as ui]
-            [respo.macros
+            [respo.core
              :refer
-             [defcomp cursor-> action-> mutation-> list-> <> div button textarea span a]]
+             [defcomp cursor-> mutation-> list-> <> div button textarea span a video]]
             [respo.comp.space :refer [=<]]
             [reel.comp.reel :refer [comp-reel]]
             [respo-md.comp.md :refer [comp-md]]
             [app.config :refer [dev?]]
-            [app.macros :refer [video]]
-            [respo-ui.comp.icon :refer [comp-icon]]
-            [clojure.tools.reader :refer [read-string]])
+            [feather.core :refer [comp-icon comp-i]]
+            [clojure.tools.reader :refer [read-string]]
+            [shadow.resource :refer [inline]])
   (:require-macros [clojure.core.strint :refer [<<]]))
 
 (def style-control-bar
@@ -25,9 +25,7 @@
     :background-color (hsl 0 0 40 0.5),
     :border-top (<< "1px solid ~{(hsl 0 0 60)}")}))
 
-(def videos
-  (read-string
-   "[\n  \"SAO/01.mp4\"\n  \"SAO/02.mp4\"\n  \"SAO/03.mp4\"\n  \"SAO/04.mp4\"\n  \"SAO/05.mp4\"\n  \"SAO/06.mp4\"\n  \"SAO/07.mp4\"\n  \"SAO/08.mp4\"\n  \"SAO/09.mp4\"\n  \"SAO/10.mp4\"\n  \"SAO/11.mp4\"\n  \"SAO/12.mp4\"\n  \"SAO/13.mp4\"\n  \"SAO/14.mp4\"\n  \"SAO/15.mp4\"\n  \"SAO/16.mp4\"\n  \"SAO/17.mp4\"\n  \"SAO/18.mp4\"\n  \"SAO/19.mp4\"\n  \"SAO/20.mp4\"\n  \"SAO/21.mp4\"\n  \"SAO/22.mp4\"\n  \"SAO/23.mp4\"\n  \"SAO/24.mp4\"\n  \"SAO/25.mp4\"\n  \"SAO2/01.mp4\"\n  \"SAO2/02.mp4\"\n  \"SAO2/03.mp4\"\n  \"SAO2/04.mp4\"\n  \"SAO2/05.mp4\"\n  \"SAO2/06.mp4\"\n  \"SAO2/07.mp4\"\n  \"SAO2/08.mp4\"\n  \"SAO2/09.mp4\"\n  \"SAO2/10.mp4\"\n  \"SAO2/11.mp4\"\n  \"SAO2/12.mp4\"\n  \"SAO2/13.mp4\"\n  \"SAO2/14.mp4\"\n  \"SAO2/15.mp4\"\n  \"SAO2/16.mp4\"\n  \"SAO2/17.mp4\"\n  \"SAO2/18.mp4\"\n  \"SAO2/19.mp4\"\n  \"SAO2/20.mp4\"\n  \"SAO2/21.mp4\"\n  \"SAO2/22.mp4\"\n  \"SAO2/23.mp4\"\n  \"SAO2/24.mp4\"\n]\n"))
+(def videos (read-string (inline "entries.edn")))
 
 (defcomp
  comp-container
@@ -44,6 +42,7 @@
      :on-click (mutation-> (-> state (update :show-control? not)))}
     (video
      {:src (str "videos/" (get videos (or (:playing-idx state) 0))),
+      :playback-rate 1.2,
       :style {:max-width "100%", :max-height "100%"},
       :controls (:show-control? state),
       :autoplay true})
@@ -55,17 +54,17 @@
         (a
          {:style {:color :white, :font-size 40},
           :on-click (mutation-> (assoc state :show-list? true))}
-         (comp-icon :android-menu))
+         (comp-i :menu 14 (hsl 200 80 80)))
         (=< 40 nil)
         (a
          {:style {:color :white, :font-size 40},
           :on-click (mutation-> (update state :playing-idx inc))}
-         (comp-icon :arrow-right-a))
+         (comp-i :arrow-left 14 (hsl 200 80 80)))
         (=< 40 nil)
         (a
          {:style {:color :white, :font-size 40},
           :on-click (mutation-> (update state :playing-idx dec))}
-         (comp-icon :arrow-left-a)))))
+         (comp-i :arrow-right 14 (hsl 200 80 80))))))
     (when (:show-list? state)
       (div
        {:style (merge ui/fullscreen ui/center {:z-index 1000}),
