@@ -14,78 +14,136 @@
             [shadow.resource :refer [inline]])
   (:require-macros [clojure.core.strint :refer [<<]]))
 
+(defcomp
+ close-button
+ (handler)
+ (a
+  {:style {:color :white, :cursor :pointer}, :on-click (fn [e d! m!] (handler d! m!))}
+  (comp-i :x 20 (hsl 0 80 60))))
+
+(defn render-link [icon handler]
+  (a
+   {:style {:color :white, :cursor :pointer}, :on-click (fn [e d! m!] (handler d! m!))}
+   (comp-i icon 18 (hsl 200 80 80))))
+
+(defcomp
+ speed-link
+ (speed selected?)
+ (a
+  {:style (merge
+           {:color (hsl 0 0 80),
+            :font-size 14,
+            :font-family ui/font-code,
+            :margin "0 20px",
+            :cursor :pointer,
+            :display :inline-block}
+           (if selected? {:color :white, :transform "scale(1.2)"})),
+   :on-click (fn [e d! m!] (d! :speed speed)),
+   :inner-text (str "x" speed)}))
+
 (def style-control-bar
-  (merge
-   ui/row-parted
-   {:position :fixed,
-    :top 0,
-    :left 0,
-    :height 80,
-    :width "100%",
-    :background-color (hsl 0 0 40 0.5),
-    :border-top (<< "1px solid ~{(hsl 0 0 60)}")}))
+  {:position :fixed,
+   :bottom 0,
+   :left 0,
+   :height 80,
+   :width "100%",
+   :background-color (hsl 0 0 20 0.7),
+   :border-top (<< "1px solid " (hsl 0 0 80 0.4)),
+   :padding "0 20px",
+   :z-index 100})
+
+(defcomp
+ comp-header
+ (store)
+ (div
+  {:style (merge ui/row-parted style-control-bar)}
+  (div
+   {:style (merge ui/row-middle {:padding "0 16px"})}
+   (render-link :menu (fn [d!] (d! :toggle-list nil)))
+   (=< 40 nil)
+   (render-link :skip-back (fn [d!] (d! :inc-index nil)))
+   (=< 40 nil)
+   (render-link :skip-forward (fn [d!] (d! :dec-index nil)))
+   (=< 40 nil)
+   (render-link
+    :chevrons-left
+    (fn [e d! m!]
+      (let [v (js/document.querySelector "video")]
+        (set! (.-currentTime v) (- (.-currentTime v) 10)))))
+   (=< 40 nil)
+   (render-link
+    :chevrons-right
+    (fn [e d! m!]
+      (let [v (js/document.querySelector "video")]
+        (set! (.-currentTime v) (+ 10 (.-currentTime v)))))))
+  (div
+   {:style ui/row-middle}
+   (speed-link 1.4 (= 1.4 (:speed store)))
+   (speed-link 2 (= 2 (:speed store)))
+   (speed-link 3 (= 3 (:speed store)))
+   (speed-link 4 (= 4 (:speed store)))
+   (speed-link 8 (= 8 (:speed store)))
+   (=< 40 nil)
+   (close-button (fn [d!] (d! :toggle-control nil))))))
 
 (def videos (read-string (inline "entries.edn")))
 
 (defcomp
+ comp-videos-list
+ (video-index)
+ (div
+  {:style (merge ui/fullscreen ui/center {:z-index 1000}),
+   :on-click (fn [e d! m!] (d! :toggle-list nil))}
+  (div
+   {:style {:width 600,
+            :height 400,
+            :background-color (hsl 0 0 0 0.6),
+            :color :white,
+            :overflow :auto},
+    :on-click (fn [e d! m!] )}
+   (list->
+    {:style {:padding "16px 0"}}
+    (->> videos
+         (map-indexed
+          (fn [idx video-name]
+            [video-name
+             (div
+              {:style (merge
+                       {:padding "0 16px", :font-size 20, :line-height "40px"}
+                       (when (= idx (or video-index 0))
+                         {:background-color (hsl 0 0 100 0.2)})),
+               :on-click (fn [e d! m!] (d! :change-idx idx))}
+              (<> video-name))])))))))
+
+(defcomp
  comp-container
  (reel)
- (let [store (:store reel)
-       states (:states store)
-       state (or (:data states) {:show-control? true, :show-list? false, :playing-idx 0})]
+ (let [store (:store reel), states (:states store), speed (or (:speed store) 1)]
    (div
     {:style (merge
              ui/global
              ui/fullscreen
              ui/center
-             {:background-color :black, :position :relative}),
-     :on-click (mutation-> (-> state (update :show-control? not)))}
+             {:background-color :black, :position :relative})}
     (video
-     {:src (str "videos/" (get videos (or (:playing-idx state) 0))),
-      :playback-rate 1.2,
-      :style {:max-width "100%", :max-height "100%"},
-      :controls (:show-control? state),
-      :autoplay true})
-    (when (:show-control? state)
+     {:src (str "videos/" (get videos (or (:playing-idx store) 0))),
+      :playback-rate speed,
+      :style {:max-width "100%", :max-height "100%", :outline :none},
+      :controls (:show-control? store),
+      :autoplay true,
+      :on-click (fn [e d! m!] (.stopPropagation (:event e)))})
+    (if (:show-control? store)
+      (comp-header store)
       (div
-       {:style style-control-bar}
-       (div
-        {:style (merge ui/row-middle {:padding "0 16px"})}
-        (a
-         {:style {:color :white, :font-size 40},
-          :on-click (mutation-> (assoc state :show-list? true))}
-         (comp-i :menu 14 (hsl 200 80 80)))
-        (=< 40 nil)
-        (a
-         {:style {:color :white, :font-size 40},
-          :on-click (mutation-> (update state :playing-idx inc))}
-         (comp-i :arrow-left 14 (hsl 200 80 80)))
-        (=< 40 nil)
-        (a
-         {:style {:color :white, :font-size 40},
-          :on-click (mutation-> (update state :playing-idx dec))}
-         (comp-i :arrow-right 14 (hsl 200 80 80))))))
-    (when (:show-list? state)
-      (div
-       {:style (merge ui/fullscreen ui/center {:z-index 1000}),
-        :on-click (mutation-> (assoc state :show-list? false))}
-       (div
-        {:style {:width 600,
-                 :height 400,
-                 :background-color (hsl 0 0 0 0.6),
-                 :color :white,
-                 :overflow :auto},
-         :on-click (fn [e d! m!] )}
-        (list->
-         {:style {:padding "16px 0"}}
-         (->> videos
-              (map-indexed
-               (fn [idx video-name]
-                 [video-name
-                  (div
-                   {:style (merge
-                            {:padding "0 16px", :font-size 20, :line-height "40px"}
-                            (when (= idx (or (:playing-idx state) 0))
-                              {:background-color (hsl 0 0 100 0.2)})),
-                    :on-click (fn [e d! m!] (m! (assoc state :playing-idx idx)))}
-                   (<> video-name))]))))))))))
+       {:style {:position :absolute,
+                :right 20,
+                :bottom 20,
+                :padding 10,
+                :opacity 0.8,
+                :background-color (hsl 0 0 0 0.4),
+                :border-radius 6,
+                :z-index 100,
+                :cursor :pointer},
+        :on-click (fn [e d! m!] (d! :toggle-control nil))}
+       (comp-i :command 18 (hsl 0 0 100))))
+    (when (:show-list? store) (comp-videos-list (:playing-idx store))))))
