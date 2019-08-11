@@ -34,7 +34,7 @@
            {:color (hsl 0 0 80),
             :font-size 14,
             :font-family ui/font-code,
-            :margin "0 20px",
+            :margin "0 14px",
             :cursor :pointer,
             :display :inline-block}
            (if selected? {:color :white, :transform "scale(1.2)"})),
@@ -45,9 +45,9 @@
   {:position :fixed,
    :bottom 0,
    :left 0,
-   :height 80,
+   :height 64,
    :width "100%",
-   :background-color (hsl 0 0 20 0.7),
+   :background-color (hsl 0 0 0 0.8),
    :border-top (<< "1px solid " (hsl 0 0 80 0.4)),
    :padding "0 20px",
    :z-index 100})
@@ -61,9 +61,9 @@
    {:style (merge ui/row-middle {:padding "0 16px"})}
    (render-link :menu (fn [d!] (d! :toggle-list nil)))
    (=< 40 nil)
-   (render-link :skip-back (fn [d!] (d! :inc-index nil)))
+   (render-link :skip-back (fn [d!] (d! :dec-index nil)))
    (=< 40 nil)
-   (render-link :skip-forward (fn [d!] (d! :dec-index nil)))
+   (render-link :skip-forward (fn [d!] (d! :inc-index nil)))
    (=< 40 nil)
    (render-link
     :chevrons-left
@@ -92,17 +92,22 @@
  comp-videos-list
  (video-index)
  (div
-  {:style (merge ui/fullscreen ui/center {:z-index 1000}),
-   :on-click (fn [e d! m!] (d! :toggle-list nil))}
+  {:style (merge ui/fullscreen ui/center {:z-index 1000, :background-color (hsl 0 0 0 0.4)}),
+   :on-click (fn [e d! m!] (comment d! :toggle-list nil))}
   (div
-   {:style {:width 600,
-            :height 400,
-            :background-color (hsl 0 0 0 0.6),
-            :color :white,
-            :overflow :auto},
+   {:style (merge
+            ui/column
+            {:width 600, :height 400, :background-color (hsl 0 0 0 0.6), :color :white}),
     :on-click (fn [e d! m!] )}
+   (div
+    {:style (merge ui/row-parted {})}
+    (span nil)
+    (comp-icon
+     :x
+     {:color (hsl 0 80 80), :font-size 20, :margin 10, :cursor :pointer}
+     (fn [e d! m!] (d! :toggle-list nil))))
    (list->
-    {:style {:padding "16px 0"}}
+    {:style (merge ui/expand {:padding "16px 0", :overflow :auto})}
     (->> videos
          (map-indexed
           (fn [idx video-name]
@@ -112,7 +117,7 @@
                        {:padding "0 16px", :font-size 20, :line-height "40px"}
                        (when (= idx (or video-index 0))
                          {:background-color (hsl 0 0 100 0.2)})),
-               :on-click (fn [e d! m!] (d! :change-idx idx))}
+               :on-click (fn [e d! m!] (d! :change-index idx))}
               (<> video-name))])))))))
 
 (defcomp
@@ -124,12 +129,12 @@
              ui/global
              ui/fullscreen
              ui/center
-             {:background-color :black, :position :relative})}
+             {:background-color :black, :position :relative, :user-select :none})}
     (video
      {:src (str "videos/" (get videos (or (:playing-idx store) 0))),
       :playback-rate speed,
       :style {:max-width "100%", :max-height "100%", :outline :none},
-      :controls (:show-control? store),
+      :controls (or true (not (:show-control? store))),
       :autoplay true,
       :on-click (fn [e d! m!] (.stopPropagation (:event e)))})
     (if (:show-control? store)
