@@ -1,15 +1,15 @@
 {
-  "short_name": "Calcit Workflow",
-  "name": "Calcit Workflow",
+  "short_name": "Serial Player",
+  "name": "Serial Player",
   "icons": [
     {
-      "src": "http://cdn.tiye.me/logo/mvc-works.png",
-      "sizes": "320x320"
+      "src": "http://cdn.tiye.me/logo/termina.png",
+      "sizes": "400x400"
     }
   ],
   "start_url": "index.html",
   "display": "fullscreen",
-  "orientation": "portrait",
+  "orientation": "natural",
   "background_color": "#eeeeff",
   "theme_color": "#eeeeff"
 }

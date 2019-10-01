@@ -11,7 +11,11 @@
   (:require-macros [clojure.core.strint :refer [<<]]))
 
 (def base-info
-  {:title (:title config/site), :icon (:icon config/site), :ssr nil, :inline-html nil})
+  {:title (:title config/site),
+   :icon (:icon config/site),
+   :ssr nil,
+   :inline-html nil,
+   :manifest "manifest.json"})
 
 (defn dev-page []
   (make-page

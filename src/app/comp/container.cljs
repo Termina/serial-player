@@ -78,11 +78,9 @@
         (set! (.-currentTime v) (+ 10 (.-currentTime v)))))))
   (div
    {:style ui/row-middle}
+   (speed-link 1 (= 1 (:speed store)))
    (speed-link 1.4 (= 1.4 (:speed store)))
    (speed-link 2 (= 2 (:speed store)))
-   (speed-link 3 (= 3 (:speed store)))
-   (speed-link 4 (= 4 (:speed store)))
-   (speed-link 8 (= 8 (:speed store)))
    (=< 40 nil)
    (close-button (fn [d!] (d! :toggle-control nil))))))
 
@@ -144,7 +142,7 @@
                 :right 20,
                 :bottom 20,
                 :padding 10,
-                :opacity 0.8,
+                :opacity 0.4,
                 :background-color (hsl 0 0 0 0.4),
                 :border-radius 6,
                 :z-index 100,
