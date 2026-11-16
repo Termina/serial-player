@@ -4,6 +4,8 @@
   "description": "ClojureScript workflow using Calcit Editor",
   "main": "index.js",
   "scripts": {
+    "build": "calcit calcit.cirru js && vite build --base=./",
+    "watch": "calcit calcit.cirru -w"
   },
   "repository": {
     "type": "git",
@@ -13,11 +15,12 @@
   "license": "MIT",
   "devDependencies": {
     "bottom-tip": "^0.1.2",
-    "vite": "^2.5.0"
+    "vite": "^7.0.0"
   },
   "dependencies": {
-    "@calcit/procs": "^0.4.19",
+    "@calcit/procs": "0.42.1",
     "feather-icons": "^4.24.1",
     "shortid": "^2.2.15"
-  }
+  },
+  "packageManager": "yarn@4.18.0"
 }
