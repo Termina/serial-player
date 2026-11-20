@@ -18,7 +18,7 @@
     "vite": "^7.0.0"
   },
   "dependencies": {
-    "@calcit/procs": "0.43.0",
+    "@calcit/procs": "0.44.0",
     "feather-icons": "^4.24.1",
     "shortid": "^2.2.15"
   },
