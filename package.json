@@ -4,7 +4,7 @@
   "description": "ClojureScript workflow using Calcit Editor",
   "main": "index.js",
   "scripts": {
-    "build": "calcit calcit.cirru js && vite build --base=./",
+    "build": "calcit calcit.cirru js && vite build --base=${VITE_BASE_URL:-./}",
     "watch": "calcit calcit.cirru -w"
   },
   "repository": {
